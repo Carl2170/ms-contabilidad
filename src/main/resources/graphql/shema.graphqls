@@ -1,0 +1,207 @@
+type Query {
+    # Account Nature Queries
+    accountNatures: [AccountNature!]!
+    accountNature(id: ID!): AccountNature
+
+    # Chart of Account Queries
+    chartOfAccounts: [ChartOfAccount!]!
+    chartOfAccount(id: ID!): ChartOfAccount
+    defaultChartOfAccount: ChartOfAccount
+
+    # Accounting Period Queries
+    accountingPeriods: [AccountingPeriod!]!
+    accountingPeriod(id: ID!): AccountingPeriod
+    accountingPeriodsByStatus(status: String!): [AccountingPeriod!]!
+
+    # Accounting Account Queries
+    accountingAccounts: [AccountingAccount!]!
+    accountingAccount(id: ID!): AccountingAccount
+    accountingAccountsByChartOfAccount(chartOfAccountId: ID!): [AccountingAccount!]!
+    accountingAccountsByParent(parentId: ID!): [AccountingAccount!]!
+
+    # Journal Entry Queries
+    journalEntries: [JournalEntry!]!
+    journalEntry(id: ID!): JournalEntry
+    journalEntriesByPeriod(periodId: ID!): [JournalEntry!]!
+    journalEntriesByStatus(status: JournalEntryStatus!): [JournalEntry!]!
+    journalEntriesByDateRange(startDate: String!, endDate: String!): [JournalEntry!]!
+
+    # Journal Entry Detail Queries
+    journalEntryDetails: [JournalEntryDetail!]!
+    journalEntryDetail(id: ID!): JournalEntryDetail
+    journalEntryDetailsByEntry(journalEntryId: ID!): [JournalEntryDetail!]!
+    journalEntryDetailsByAccount(accountId: ID!): [JournalEntryDetail!]!
+    accountBalance(accountId: ID!): AccountBalance!
+}
+
+type Mutation {
+    # Account Nature Mutations
+    createAccountNature(input: AccountNatureInput!): AccountNature!
+    updateAccountNature(id: ID!, input: AccountNatureInput!): AccountNature!
+    deleteAccountNature(id: ID!): Boolean!
+
+    # Chart of Account Mutations
+    createChartOfAccount(input: ChartOfAccountInput!): ChartOfAccount!
+    updateChartOfAccount(id: ID!, input: ChartOfAccountInput!): ChartOfAccount!
+    deleteChartOfAccount(id: ID!): Boolean!
+
+    # Accounting Period Mutations
+    createAccountingPeriod(input: AccountingPeriodInput!): AccountingPeriod!
+    updateAccountingPeriod(id: ID!, input: AccountingPeriodInput!): AccountingPeriod!
+    deleteAccountingPeriod(id: ID!): Boolean!
+
+    # Accounting Account Mutations
+    createAccountingAccount(input: AccountingAccountInput!): AccountingAccount!
+    updateAccountingAccount(id: ID!, input: AccountingAccountInput!): AccountingAccount!
+    deleteAccountingAccount(id: ID!): Boolean!
+
+    # Journal Entry Mutations
+    createJournalEntry(input: JournalEntryInput!): JournalEntry!
+    updateJournalEntry(id: ID!, input: JournalEntryInput!): JournalEntry!
+    postJournalEntry(id: ID!): JournalEntry!
+    deleteJournalEntry(id: ID!): Boolean!
+
+    # Journal Entry Detail Mutations
+    createJournalEntryDetail(input: JournalEntryDetailInput!): JournalEntryDetail!
+    updateJournalEntryDetail(id: ID!, input: JournalEntryDetailInput!): JournalEntryDetail!
+    deleteJournalEntryDetail(id: ID!): Boolean!
+}
+
+# Account Nature
+type AccountNature {
+    id: ID!
+    name: String!
+    defaultBalanceType: String!
+}
+
+input AccountNatureInput {
+    name: String!
+    defaultBalanceType: String!
+}
+
+# Chart of Account
+type ChartOfAccount {
+    id: ID!
+    name: String!
+    description: String
+    isDefault: Boolean!
+    createdAt: String!
+    updatedAt: String!
+    accounts: [AccountingAccount!]!
+}
+
+input ChartOfAccountInput {
+    name: String!
+    description: String
+    isDefault: Boolean
+}
+
+# Accounting Period
+type AccountingPeriod {
+    id: ID!
+    name: String!
+    startDate: String!
+    endDate: String!
+    status: String!
+    createdAt: String!
+    updatedAt: String!
+}
+
+input AccountingPeriodInput {
+    name: String!
+    startDate: String!
+    endDate: String!
+    status: String!
+}
+
+# Accounting Account
+type AccountingAccount {
+    id: ID!
+    accountNature: AccountNature!
+    chartOfAccount: ChartOfAccount!
+    parentAccount: AccountingAccount
+    code: String!
+    name: String!
+    description: String
+    level: Int!
+    isActive: Boolean!
+    isTransactional: Boolean!
+    createdAt: String!
+    updatedAt: String!
+    childAccounts: [AccountingAccount!]!
+}
+
+input AccountingAccountInput {
+    accountNatureId: ID!
+    chartOfAccountId: ID!
+    parentAccountId: ID
+    code: String!
+    name: String!
+    description: String
+    level: Int!
+    isActive: Boolean
+    isTransactional: Boolean
+}
+
+# Journal Entry Types
+type JournalEntry {
+    id: ID!
+    accountingPeriod: AccountingPeriod!
+    entryDate: String!
+    description: String
+    sourceDocumentId: String
+    sourceDocumentType: String
+    status: JournalEntryStatus!
+    userId: ID
+    postedAt: String
+    createdAt: String!
+    updatedAt: String!
+    details: [JournalEntryDetail!]!
+    totalDebits: String!
+    totalCredits: String!
+    isBalanced: Boolean!
+}
+
+input JournalEntryInput {
+    accountingPeriodId: ID!
+    entryDate: String!
+    description: String
+    sourceDocumentId: String
+    sourceDocumentType: String
+    userId: ID
+    details: [JournalEntryDetailInput!]!
+}
+
+enum JournalEntryStatus {
+    DRAFT
+    POSTED
+    REVERSED
+}
+
+# Journal Entry Detail Types
+type JournalEntryDetail {
+    id: ID!
+    journalEntry: JournalEntry!
+    account: AccountingAccount!
+    description: String
+    debitAmount: String!
+    creditAmount: String!
+    createdAt: String!
+}
+
+input JournalEntryDetailInput {
+    journalEntryId: ID
+    accountId: ID!
+    description: String
+    debitAmount: String!
+    creditAmount: String!
+}
+
+# Account Balance Type
+type AccountBalance {
+    accountId: ID!
+    account: AccountingAccount!
+    totalDebits: String!
+    totalCredits: String!
+    balance: String!
+}
