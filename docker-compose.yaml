@@ -1,0 +1,37 @@
+services:
+  postgres_db_users:
+    image: postgres:15
+    container_name: postgres_db_users
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: ms_contabilidad
+    volumes:
+      - postgres_data_users:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  spring_app_users:
+    build: .
+    container_name: spring_app_users
+    depends_on:
+      - postgres_db_users
+    ports:
+      - "8002:8002"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_db_users:5432/ms_contabilidad
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+    networks:
+      - microservices_network
+
+networks:
+  microservices_network:
+    external: true
+
+volumes:
+  postgres_data_users:
