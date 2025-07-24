@@ -205,3 +205,168 @@ type AccountBalance {
     totalCredits: String!
     balance: String!
 }
+
+# ========== AGREGAR ESTAS LÍNEAS AL ARCHIVO EXISTENTE ==========
+
+type Query {
+    # ... queries existentes ...
+
+    # Customer Queries
+    customers: [Customer!]!
+    customer(id: ID!): Customer
+    activeCustomers: [Customer!]!
+    searchCustomers(searchTerm: String!): [Customer!]!
+
+    # Customer Invoice Queries
+    customerInvoices: [CustomerInvoice!]!
+    customerInvoice(id: ID!): CustomerInvoice
+    customerInvoicesByCustomer(customerId: ID!): [CustomerInvoice!]!
+    customerInvoicesByStatus(status: InvoiceStatus!): [CustomerInvoice!]!
+    overdueInvoices: [CustomerInvoice!]!
+
+    # Customer Payment Queries
+    customerPayments: [CustomerPayment!]!
+    customerPayment(id: ID!): CustomerPayment
+    customerPaymentsByCustomer(customerId: ID!): [CustomerPayment!]!
+    customerPaymentsByInvoice(invoiceId: ID!): [CustomerPayment!]!
+}
+
+type Mutation {
+    # ... mutaciones existentes ...
+
+    # Customer Mutations
+    createCustomer(input: CustomerInput!): Customer!
+    updateCustomer(id: ID!, input: CustomerInput!): Customer!
+    deleteCustomer(id: ID!): Boolean!
+
+    # Customer Invoice Mutations
+    createCustomerInvoice(input: CustomerInvoiceInput!): CustomerInvoice!
+    updateCustomerInvoice(id: ID!, input: CustomerInvoiceInput!): CustomerInvoice!
+    deleteCustomerInvoice(id: ID!): Boolean!
+
+    # Customer Payment Mutations
+    createCustomerPayment(input: CustomerPaymentInput!): CustomerPayment!
+    updateCustomerPayment(id: ID!, input: CustomerPaymentInput!): CustomerPayment!
+    deleteCustomerPayment(id: ID!): Boolean!
+}
+
+# Customer Types
+type Customer {
+    id: ID!
+    code: String!
+    name: String!
+    documentType: String
+    documentNumber: String
+    email: String
+    phone: String
+    address: String
+    accountingAccount: AccountingAccount
+    isActive: Boolean!
+    createdAt: String!
+    updatedAt: String!
+    invoices: [CustomerInvoice!]!
+    payments: [CustomerPayment!]!
+    totalPendingAmount: String!
+}
+
+input CustomerInput {
+    code: String
+    name: String!
+    documentType: String
+    documentNumber: String
+    email: String
+    phone: String
+    address: String
+    accountingAccountId: ID
+    isActive: Boolean
+}
+
+# Customer Invoice Types
+type CustomerInvoice {
+    id: ID!
+    invoiceNumber: String!
+    customer: Customer!
+    accountingPeriod: AccountingPeriod!
+    invoiceDate: String!
+    dueDate: String
+    subtotal: String!
+    taxAmount: String!
+    totalAmount: String!
+    status: InvoiceStatus!
+    journalEntry: JournalEntry
+    createdAt: String!
+    updatedAt: String!
+    details: [CustomerInvoiceDetail!]!
+    payments: [CustomerPayment!]!
+    paidAmount: String!
+    pendingAmount: String!
+}
+
+input CustomerInvoiceInput {
+    invoiceNumber: String
+    customerId: ID!
+    accountingPeriodId: ID!
+    invoiceDate: String!
+    dueDate: String
+    taxAmount: String
+    details: [CustomerInvoiceDetailInput!]!
+}
+
+enum InvoiceStatus {
+    PENDING
+    PAID
+    CANCELLED
+    OVERDUE
+}
+
+# Customer Invoice Detail Types
+type CustomerInvoiceDetail {
+    id: ID!
+    customerInvoice: CustomerInvoice!
+    description: String!
+    quantity: String!
+    unitPrice: String!
+    totalAmount: String!
+}
+
+input CustomerInvoiceDetailInput {
+    description: String!
+    quantity: String!
+    unitPrice: String!
+}
+
+# Customer Payment Types
+type CustomerPayment {
+    id: ID!
+    paymentNumber: String!
+    customer: Customer!
+    customerInvoice: CustomerInvoice
+    accountingPeriod: AccountingPeriod!
+    paymentDate: String!
+    amount: String!
+    paymentMethod: PaymentMethod!
+    bankAccountId: ID
+    reference: String
+    journalEntry: JournalEntry
+    createdAt: String!
+}
+
+input CustomerPaymentInput {
+    paymentNumber: String
+    customerId: ID!
+    customerInvoiceId: ID
+    accountingPeriodId: ID!
+    paymentDate: String!
+    amount: String!
+    paymentMethod: PaymentMethod!
+    bankAccountId: ID
+    reference: String
+}
+
+enum PaymentMethod {
+    CASH
+    BANK_TRANSFER
+    CHECK
+    CREDIT_CARD
+    DEBIT_CARD
+}
